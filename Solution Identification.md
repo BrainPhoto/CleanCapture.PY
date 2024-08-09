@@ -1,12 +1,16 @@
 ### Solution Identification
 
-**Title**: **Waste Detection and Classification app**
+**Title**: **Automated Waste Classification Using Image Recognition**
 
-**Overview**:
-To tackle the challenges of waste management, I developed a web application that automatically detects and classifies waste as organic, recyclable, or non-recyclable. This solution uses Azure Custom Vision and a Kaggle dataset to create a precise and efficient waste classification system, which can be used for both images and live video.
+**Solution Overview**:
+To address the growing challenges of waste management, a web application was developed to automatically detect and classify waste as organic, recyclable, or non-recyclable. This solution leverages Azure Custom Vision and a publicly available dataset from Kaggle to provide an efficient and accurate method for waste classification.
 
 **Key Features**:
-- **Object Detection**: The application identifies and locates different types of waste within images, ensuring accurate classification.
-- **Cloud Integration**: Using Azure Custom Vision, the model is trained and deployed in the cloud, enabling scalable and reliable performance.
-- **User-Friendly Interface**: The web app provides a simple platform for users to upload images or capture live video for instant waste classification.
-- **Environmental Impact**: The tool helps reduce landfill waste by promoting proper recycling and disposal practices.
+1. **Object Detection**:
+   - The application uses Azure Custom Vision to detect and classify waste in images. Object detection is used to precisely locate and categorize waste materials within images, ensuring accurate sorting.
+
+2. **User-Friendly Interface**:
+   - The app features a simple interface where users can upload images or capture real-time photos for classification.
+
+3. **Educational Content**:
+   - The app includes resources on proper waste disposal practices, helping users learn how to recycle correctly and reduce waste.
