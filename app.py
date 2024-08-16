@@ -1,21 +1,35 @@
 import streamlit as st
 import requests
 from PIL import Image
-import base64  # Import base64 for encoding the image
+import base64
+import os
 
 # Azure Custom Vision API credentials
 PREDICTION_KEY = "8f9ae3559303456a9297072314804f24"
 URL_ENDPOINT_IMAGE = "https://brainphoto-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/de6d63d2-71eb-4309-acf3-50779f24bd0d/classify/iterations/Iteration2/image"
 URL_ENDPOINT_URL = "https://brainphoto-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/de6d63d2-71eb-4309-acf3-50779f24bd0d/classify/iterations/Iteration2/url"
 
+# Function to download the image from GitHub if it doesn't exist
+def download_image(image_path, github_url):
+    if not os.path.exists(image_path):
+        response = requests.get(github_url)
+        with open(image_path, 'wb') as f:
+            f.write(response.content)
+
+# Paths and URLs
+image_path = "/workspaces/CleanCapture.PY/image/waste.png"
+github_url = "https://github.com/armaf002/CleanCapture.PY/raw/main/image/waste.png"
+
+# Download the image if it doesn't exist
+download_image(image_path, github_url)
+
 # Sidebar navigation
 st.sidebar.title("Waste Detection App")
-menu = st.sidebar.radio("Navigate", ["Home", "Waste Upload", "Waste Capture", "Waste Streaming", "Recycling Guidelines","Feedback"])
+menu = st.sidebar.radio("Navigate", ["Home", "Waste Upload", "Waste Capture", "Waste Streaming", "Recycling Guidelines", "Feedback"])
 
 # Home Page
 if menu == "Home":
-    # Inject CSS to set the background image
-    with open("/workspaces/CleanCapture.PY/image/waste.png", "rb") as f:
+    with open(image_path, "rb") as f:
         background_image = base64.b64encode(f.read()).decode()
 
     st.markdown(f"""
@@ -191,25 +205,10 @@ elif menu == "Recycling Guidelines":
     st.subheader("Proper Disposal of Non-Recyclable Waste:")
     st.write("""
     - **Dispose Safely:** Place non-recyclable waste in your regular trash bins.
-    - **Handle Hazardous Waste Separately:** Items like batteries and chemicals should 
-      be disposed of through special hazardous waste programs.
-    - **Reduce Usage:** Minimize the use of non-recyclable materials where possible by 
-      opting for reusable or recyclable alternatives.
-    """)
-
-    st.header("Additional Resources")
-    st.write("""
-    For more information on recycling guidelines specific to your region, visit the 
-    following links:
-    - [Recycling Guidelines by Region](#)
-    - [How to Properly Dispose of Hazardous Materials](#)
-    - [Tips on Reducing Waste and Promoting Sustainability](#)
-    - [Composting at Home: A Beginner's Guide](#)
-    """)
-
-    st.write("""
-    Remember, proper waste management starts with you! By following these guidelines, 
-    you can contribute to a cleaner, more sustainable environment.
+    - **Handle Hazardous Waste Carefully:** Follow local guidelines for disposing of 
+      hazardous materials.
+    - **Reduce Waste:** Whenever possible, minimize the amount of non-recyclable 
+      waste you produce by choosing reusable or recyclable alternatives.
     """)
 
 # Feedback Page
@@ -230,4 +229,4 @@ elif menu == "Feedback":
             st.write(f"Message sent by **{name}** with subject **{subject}** successfully")
             st.success("Thank you for your feedback!")
 
-            
+
