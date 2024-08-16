@@ -1,29 +1,19 @@
 import streamlit as st
 import requests
-import cv2
 from PIL import Image
-import numpy as np
-import base64  
+import base64  # Import base64 for encoding the image
 
-# Azure Custom Vision API details
-prediction_url_file = "https://brainphoto-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/de6d63d2-71eb-4309-acf3-50779f24bd0d/classify/iterations/Iteration2/image"
-prediction_url_url = "https://brainphoto-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/de6d63d2-71eb-4309-acf3-50779f24bd0d/classify/iterations/Iteration2/url"
-prediction_key = "8f9ae3559303456a9297072314804f24"
+# Azure Custom Vision API credentials
+PREDICTION_KEY = "8f9ae3559303456a9297072314804f24"
+URL_ENDPOINT_IMAGE = "https://brainphoto-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/de6d63d2-71eb-4309-acf3-50779f24bd0d/classify/iterations/Iteration2/image"
+URL_ENDPOINT_URL = "https://brainphoto-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/de6d63d2-71eb-4309-acf3-50779f24bd0d/classify/iterations/Iteration2/url"
 
-# Function to send image to Azure Custom Vision API
-def analyze_image(image):
-    headers = {
-        'Prediction-Key': prediction_key,
-        'Content-Type': 'application/octet-stream'
-    }
-    response = requests.post(prediction_url_file, headers=headers, data=image)
-    return response.json()
+# Sidebar navigation
+st.sidebar.title("Waste Detection App")
+menu = st.sidebar.radio("Navigate", ["Home", "Waste Upload", "Waste Capture", "Waste Streaming", "Recycling Guidelines","Feedback"])
 
-# Set up the main layout
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Live Streaming", "Capture Image", "Upload Image", "Recycling Guidelines", "Feedback"])
-
-if page == "Home":
+# Home Page
+if menu == "Home":
     # Inject CSS to set the background image
     with open("/workspaces/CleanCapture.PY/image/waste.png", "rb") as f:
         background_image = base64.b64encode(f.read()).decode()
@@ -47,75 +37,83 @@ if page == "Home":
     
     st.markdown("<div class='box'><h1>Welcome to the Recyclable Material Detector</h1><p>This app helps you detect organic and recyclable materials from images or live streaming. Navigate through the sidebar to explore the features.</p></div>", unsafe_allow_html=True)
 
-elif page == "Live Streaming":
-    st.title("Live Streaming")
-    st.write("Analyze live video feed for recyclable objects.")
+# Waste Upload Page
+elif menu == "Waste Upload":
+    st.title("Waste Upload")
+    
+    # Option to upload an image or use a URL
+    upload_option = st.radio("Select Upload Option", ["Upload from File", "Upload from URL"])
+    
+    if upload_option == "Upload from File":
+        image_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+        if image_file:
+            image = Image.open(image_file)
+            st.image(image, caption="Uploaded Image", use_column_width=True)
+
+            # Send the image to Azure Custom Vision API
+            headers = {
+                "Prediction-Key": PREDICTION_KEY,
+                "Content-Type": "application/octet-stream"
+            }
+            response = requests.post(URL_ENDPOINT_IMAGE, headers=headers, data=image_file.getvalue())
+            prediction = response.json()
+            
+            # Displaying the results in a human-readable format
+            st.write("### Prediction Results:")
+            for pred in prediction["predictions"]:
+                st.write(f"- **{pred['tagName']}**: {pred['probability'] * 100:.2f}%")
+
+    elif upload_option == "Upload from URL":
+        image_url = st.text_input("Enter Image URL")
+        if image_url:
+            headers = {
+                "Prediction-Key": PREDICTION_KEY,
+                "Content-Type": "application/json"
+            }
+            response = requests.post(URL_ENDPOINT_URL,
+                                     headers=headers,
+                                     json={"Url": image_url})
+            prediction = response.json()
+            st.image(image_url, caption="Image from URL", use_column_width=True)
+            
+            # Displaying the results in a human-readable format
+            st.write("### Prediction Results:")
+            for pred in prediction["predictions"]:
+                st.write(f"- **{pred['tagName']}**: {pred['probability'] * 100:.2f}%")
+
+# Waste Capture Page
+elif menu == "Waste Capture":
+    st.title("Waste Capture")
+    st.write("This feature will allow you to capture an image live using your device's camera.")
+
+    # Camera Capture (Streamlit built-in functionality)
+    img_file_buffer = st.camera_input("Capture an image")
+    if img_file_buffer:
+        image = Image.open(img_file_buffer)
+        st.image(image, caption="Captured Image", use_column_width=True)
+        # Send captured image to Azure Custom Vision API
+        headers = {
+            "Prediction-Key": PREDICTION_KEY,
+            "Content-Type": "application/octet-stream"
+        }
+        response = requests.post(URL_ENDPOINT_IMAGE, headers=headers, data=img_file_buffer.getvalue())
+        prediction = response.json()
+        
+        # Displaying the results in a human-readable format
+        st.write("### Prediction Results:")
+        for pred in prediction["predictions"]:
+            st.write(f"- **{pred['tagName']}**: {pred['probability'] * 100:.2f}%")
+
+# Waste Streaming Page
+elif menu == "Waste Streaming":
+    st.title("Waste Streaming")
+    st.write("This feature will allow you to stream video and capture frames for waste detection.")
     # Live streaming functionality (simplified)
     st.write("Feature in development.")
 
-elif page == "Capture Image":
-    st.title("Capture Image")
-    st.write("Capture an image using your device's camera and analyze it for recyclable materials.")
-    captured_image = st.camera_input("Capture an image")
+    # Streaming setup and processing will go here.
 
-    if captured_image is not None:
-        image = Image.open(captured_image)
-        st.image(image, caption="Captured Image", use_column_width=True)
-
-        # Convert image to bytes
-        img_bytes = cv2.imencode('.jpg', np.array(image))[1].tobytes()
-
-        # Send image to Azure Custom Vision API
-        result = analyze_image(img_bytes)
-
-        # Display results
-        st.write("Prediction Results:")
-        for prediction in result['predictions']:
-            st.write(f"{prediction['tagName']}: {prediction['probability']*100:.2f}%")
-
-elif page == "Upload Image":
-    st.title("Upload Image")
-    st.write("Upload an image file or provide an image URL to analyze it for recyclable materials.")
-    upload_type = st.radio("Select upload type:", ["File Upload", "URL Upload"])
-
-    if upload_type == "File Upload":
-        uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
-
-        if uploaded_file is not None:
-            image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", use_column_width=True)
-
-            # Convert image to bytes
-            img_bytes = uploaded_file.read()
-
-            # Send image to Azure Custom Vision API
-            result = analyze_image(img_bytes)
-
-            # Display results
-            st.write("Prediction Results:")
-            for prediction in result['predictions']:
-                st.write(f"{prediction['tagName']}: {prediction['probability']*100:.2f}%")
-
-    else:
-        image_url = st.text_input("Enter image URL")
-
-        if image_url:
-            # Send URL to Azure Custom Vision API
-            headers = {
-                'Prediction-Key': prediction_key,
-                'Content-Type': 'application/json'
-            }
-            data = {"Url": image_url}
-            response = requests.post(prediction_url_url, headers=headers, json=data)
-            result = response.json()
-
-            # Display image and results
-            st.image(image_url, caption="Image from URL", use_column_width=True)
-            st.write("Prediction Results:")
-            for prediction in result['predictions']:
-                st.write(f"{prediction['tagName']}: {prediction['probability']*100:.2f}%")
-
-elif page == "Recycling Guidelines":
+elif menu == "Recycling Guidelines":
     st.title("Recycling Guidelines")
     st.write("""
     Welcome to the Recycling Guidelines page! Here, you'll find essential information 
@@ -214,7 +212,8 @@ elif page == "Recycling Guidelines":
     you can contribute to a cleaner, more sustainable environment.
     """)
 
-elif page == "Feedback":
+# Feedback Page
+elif menu == "Feedback":
     st.title("Feedback")
     st.write("Report any misclassifications or issues.")
     # st.write("Provide a way for users to report feedback, possibly via email.")
@@ -228,6 +227,7 @@ elif page == "Feedback":
 
         if submit_button:
             # You can replace this with your email sending logic
-            st.write(f"Message sent by {name} with subject {subject}")
+            st.write(f"Message sent by **{name}** with subject **{subject}** successfully")
+            st.success("Thank you for your feedback!")
 
             
