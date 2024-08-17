@@ -9,19 +9,8 @@ PREDICTION_KEY = "8f9ae3559303456a9297072314804f24"
 URL_ENDPOINT_IMAGE = "https://brainphoto-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/de6d63d2-71eb-4309-acf3-50779f24bd0d/classify/iterations/Iteration2/image"
 URL_ENDPOINT_URL = "https://brainphoto-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/de6d63d2-71eb-4309-acf3-50779f24bd0d/classify/iterations/Iteration2/url"
 
-# Function to download the image from GitHub if it doesn't exist
-def download_image(image_path, github_url):
-    if not os.path.exists(image_path):
-        response = requests.get(github_url)
-        with open(image_path, 'wb') as f:
-            f.write(response.content)
-
 # Paths and URLs
-image_path = "/workspaces/CleanCapture.PY/image/waste.png"
-github_url = "https://github.com/armaf002/CleanCapture.PY/raw/main/image/waste.png"
-
-# Download the image if it doesn't exist
-download_image(image_path, github_url)
+image_path = "https://raw.githubusercontent.com/armaf002/CleanCapture/main/image/waste.png"
 
 # Sidebar navigation
 st.sidebar.title("Waste Detection App")
@@ -29,8 +18,8 @@ menu = st.sidebar.radio("Navigate", ["Home", "Waste Upload", "Waste Capture", "W
 
 # Home Page
 if menu == "Home":
-    with open(image_path, "rb") as f:
-        background_image = base64.b64encode(f.read()).decode()
+    response = requests.get(image_path)
+    background_image = base64.b64encode(response.content).decode()
 
     st.markdown(f"""
         <style>
