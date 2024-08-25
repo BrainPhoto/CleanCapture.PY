@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 from PIL import Image
 import base64
-import os
 
 # Azure Custom Vision API credentials
 PREDICTION_KEY = "8f9ae3559303456a9297072314804f24"
@@ -11,10 +10,11 @@ URL_ENDPOINT_URL = "https://brainphoto-prediction.cognitiveservices.azure.com/cu
 
 # Paths and URLs
 image_path = "https://raw.githubusercontent.com/armaf002/CleanCapture/main/image/waste.png"
+waste_app_url = "https://waste-chat.azurewebsites.net/"  # AI Chat Web App URL
 
 # Sidebar navigation
 st.sidebar.title("Waste Detection App")
-menu = st.sidebar.radio("Navigate", ["Home", "Waste Upload", "Waste Capture", "Waste Streaming", "Recycling Guidelines", "Feedback"])
+menu = st.sidebar.radio("Navigate", ["Home", "Waste Upload", "Waste Capture", "Waste Streaming", "Recycling Guidelines", "AI Chat", "Feedback"])
 
 # Home Page
 if menu == "Home":
@@ -39,7 +39,32 @@ if menu == "Home":
     """, unsafe_allow_html=True)
     
     st.markdown("<div class='box'><h1>Welcome to the Recyclable Material Detector</h1><p>This app helps you detect organic and recyclable materials from images or live streaming. Navigate through the sidebar to explore the features.</p></div>", unsafe_allow_html=True)
+    
+    # AI Chat Section
+    st.markdown("""
+        <div class='box'>
+            <h2>🌟 Try Our AI Chat Assistant!</h2>
+            <p>Have questions about waste management or recycling? Our AI chat assistant is here to help you! Click the button below to start chatting with our AI and get instant answers.</p>
+            <a href='https://waste-chat.azurewebsites.net/' target='_blank'>
+                <button style='background-color:#4CAF50; color:white; padding:15px 32px; text-align:center; text-decoration:none; display:inline-block; font-size:16px; border-radius:12px;'>Chat with AI</button>
+            </a>
+        </div>
+    """, unsafe_allow_html=True)
 
+# AI Chat Page
+elif menu == "AI Chat":
+    st.title("AI Chat Assistant")
+    st.write("Have questions about waste management or recycling? Our AI chat assistant is here to help you!")
+    st.write("Click the button below to start chatting with our AI and get instant answers.")
+
+    # AI Chat Button
+    st.markdown("""
+        <a href='https://waste-chat.azurewebsites.net/' target='_blank'>
+            <button style='background-color:#4CAF50; color:white; padding:15px 32px; text-align:center; text-decoration:none; display:inline-block; font-size:16px; border-radius:12px;'>Chat with AI</button>
+        </a>
+    """, unsafe_allow_html=True)
+
+# Remaining code for Waste Upload, Capture, Streaming, Guidelines, and Feedback pages...
 # Waste Upload Page
 elif menu == "Waste Upload":
     st.title("Waste Upload")
@@ -217,5 +242,3 @@ elif menu == "Feedback":
             # You can replace this with your email sending logic
             st.write(f"Message sent by **{name}** with subject **{subject}** successfully")
             st.success("Thank you for your feedback!")
-
-
