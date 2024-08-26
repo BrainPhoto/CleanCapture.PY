@@ -1,7 +1,7 @@
 import pytest
 import requests
 from unittest.mock import patch
-from app import PREDICTION_KEY, URL_ENDPOINT_IMAGE, URL_ENDPOINT_URL  
+from app import PREDICTION_KEY, URL_ENDPOINT_IMAGE, URL_ENDPOINT_URL  # Importez les constantes depuis votre script Streamlit
 
 @pytest.fixture
 def mock_image_response():
